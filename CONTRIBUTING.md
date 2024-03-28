@@ -1,30 +1,16 @@
-Describe in this file:
-
-- team organization, roles, communication
-- the rules to be respected by your future contributors
-
 # Contributing guidelines
 
 ## Team organization
 
-### Roles
+The main contributor and maintainer of this repository is [Martin Gegenleitner](mailto:martin.gegenleitner@thalesgroup.com).
 
-## How to become a contributor
+## How to become a contributor and submit your own code
 
-### Contributor License Agreements
-
-### Contributing code
-
-## Pull Request Checklist
+* Submit an issue describing your proposed change to the repo in question.
+* The repository owner will respond to your issue.
+* Fork the desired repository, develop and test your changes.
+* Submit a pull request.
 
 ### License
 
-### Coding style
-
-### Testing
-
-#### Running sanity check
-
-#### Running unit tests
-
-### Issues management
+All changes to this repository must comply to its [MIT License](/LICENSE).
