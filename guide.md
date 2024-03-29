@@ -329,7 +329,7 @@ Better shown in a video: Watch [here](https://youtu.be/BduP1CHd_58) to see how t
 
 ### 6a. Configure a Windows 11 Client for DKE with Builtin-Labeling
 
-Better shown in a video: Watch [here](https://TBD.com) to see how to setup your Windows 11 clients to able to use DKE labels to protect your most sensitive data.
+Better shown in a video: Watch [here](https://youtu.be/OozJySbx_PU) to see how to setup your Windows 11 clients to able to use DKE labels to protect your most sensitive data.
 
 ### 6b. Configure a Windows 10 Client for DKE with AIP (legacy integrarion)
 
