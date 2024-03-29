@@ -19,7 +19,7 @@ spec:
       nodeSelector:
         "kubernetes.io/os": linux
       containers:
-        - image: YOUR_ACR_RESOURCE.azurecr.io/luna-key-broker-for-dke:v1.1
+        - image: YOUR_ACR_RESOURCE.azurecr.io/luna-key-broker-for-dke-centos7:v1.2.0
           name: luna-key-broker-for-dke
           imagePullPolicy: IfNotPresent
           resources:

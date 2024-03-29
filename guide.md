@@ -64,7 +64,7 @@ It is required to have the DKE service available for your clients under a FQDN w
 
 A checklist of what you need and what will be used in this guide:
 
-* The container image of THALES' Luna Key Broker for DKE as a tar ball. This guide assumes version 1.1.
+* The container image of THALES' Luna Key Broker for DKE as a tar ball. This guide assumes version 1.2.
 * Access to a DPoD tenant to create a DPoD service. Else you can request your THALES contact to share details to an existing service.
 * Free DNS name for your DKE service
   * *lkb-on.azure.gegenleitner.eu* will be used.
@@ -82,7 +82,7 @@ A checklist of what you need and what will be used in this guide:
 Watch this small video ([link](https://youtu.be/45EN6CySi9c)) to setup all required resources:
 
 * New dedicated resource group (*luna-key-broker-demo*)
-* Ubuntu Server 20.04 LTS (*management-linux*)
+* Ubuntu Server 22.04 LTS (*management-linux*)
 * AKS cluster with ACR (*dke-cluster* and *dkerepository*)
   * *dkerepository* for ACR might be shown as taken, because this must be a unique name across Azure. If this is the case, just select another name (required changes will be noted in the guide later)
 * Windows 10/11 client (*dke-client*)
@@ -97,10 +97,10 @@ cd ~
 # Ensure git is installed
 sudo apt-get update && sudo apt-get install -y git unzip
 # Checkout this git repository to have all scripts at hand
-git clone https://github.com/martingegenleitner/thales-dke-service-setup.git
+git clone https://github.com/ThalesGroup/dke-service-setup.git
 # Call the installer script to get all required tools onto your management machine
-chmod +x ~/thales-dke-service-setup/mgmt-linux/install_tooling.sh
-~/thales-dke-service-setup/mgmt-linux/install_tooling.sh
+chmod +x ~/dke-service-setup/mgmt-linux/install_tooling.sh
+~/dke-service-setup/mgmt-linux/install_tooling.sh
 # Create a few directories to organize your tooling
 mkdir -p ~/hsm
 mkdir -p ~/k8s
@@ -234,22 +234,20 @@ az acr login --name $ACR_NAME
 # Import the docker image from THALES and push it to your ACR resource
 ####
 cd ~/k8s
-# (optional)
-# If you received the zip-file 610-000693-002_SW_Docker_image_Luna_Key_Broker_for_Microsoft_DKE.zip
-# then you have to first unzip it and copy the actual tar ball with the image to the working directory.
-unzip 610-000693-002_SW_Docker_image_Luna_Key_Broker_for_Microsoft_DKE.zip
+# Upload the CentOS-based Docker image from the Thales support portal to the current folder
+unzip 610-000862-002_SW_Docker_Image_Luna_Key_Broker_for_Microsoft_DKE_centos7_v1.2.0.zip
 
 # Import the docker image to your local docker registry
-docker load -i luna-key-broker-for-dke_v1.1.tar
+docker load -i 610-000862-002_SW_Docker_Image_Luna_Key_Broker_for_Microsoft_DKE_centos7_v1.2.0/luna-key-broker-for-dke-centos7_v1.2.0.tar
 # Tag the docker image and push it to your ACR
-docker tag luna-key-broker-for-dke:v1.1 $ACR_NAME.azurecr.io/luna-key-broker-for-dke:v1.1
-docker push $ACR_NAME.azurecr.io/luna-key-broker-for-dke:v1.1
+docker tag luna-key-broker-for-dke-centos7:v1.2.0 $ACR_NAME.azurecr.io/luna-key-broker-for-dke-centos7:v1.2.0
+docker push $ACR_NAME.azurecr.io/luna-key-broker-for-dke-centos7:v1.2.0
 
 ####
 # Create kubernetes resources on AKS
 ####
 # Copy all resources/templates from this repository into your kubernetes directory
-cp ~/thales-dke-service-setup/dke-service/* .
+cp ~/dke-service-setup/dke-service/* .
 
 # Create a namespace for your dke service resources
 kubectl create namespace dke
@@ -257,17 +255,19 @@ kubectl create namespace dke
 # (refer to https://learn.microsoft.com/en-us/azure/aks/ingress-basic?tabs=azure-cli on how to deploy ingress-nginx on AKS)
 # Add the ingress-nginx repository to your local helm
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 # Use Helm to deploy an NGINX ingress controller
 # (The last line is only required on AKS clusters. Can be omitted on other k8s clusters. See https://github.com/Azure/AKS/issues/2903 fpr explainations)
 helm install ingress-nginx ingress-nginx/ingress-nginx \
   --namespace dke \
-  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz
+  --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz \
+  --set controller.service.externalTrafficPolicy=Local
 
 ####
 # Query the public IP of the cluster's ingress for setting up DNS
 ####
 # Get the public IP of the cluster ingress by quering the services.
-# The EXTERNAL-IP of the service "nginx-ingress-ingress-nginx-controller" must be set
+# The EXTERNAL-IP of the service "ingress-nginx-controller" must be set
 # as an A-Record for the chosen FQDN of your DKE service.
 kubectl get services --namespace dke
 
@@ -285,7 +285,7 @@ kubectl create secret generic credentials --from-literal=password='jhgfdsa' --na
 kubectl create secret generic auth-claim --from-file=opa_policies.rego --namespace dke
 
 # Install cert-manager as described at https://cert-manager.io/docs/installation/#default-static-install
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.0/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
 
 # Finally deploy custom kubernetes resources via yaml files.
 
